@@ -1,7 +1,7 @@
 {
-  "name": "Yaap",
-  "short_name": "Yaap",
-  "description": "Yaap — Food ordering for vendors and riders",
+  "name": "YAPP",
+  "short_name": "YAPP",
+  "description": "YAPP — Food ordering for vendors and riders",
   "background_color": "#2D7A3A",
   "theme_color": "#2D7A3A",
   "display": "standalone",
