@@ -1,4 +1,4 @@
-// YAPP push service worker.
+// Yaap push service worker.
 //
 // SCOPE WARNING — do not "simplify" this by registering at the root.
 // Flutter registers its own `flutter_service_worker.js` at scope `/` (see the
@@ -10,17 +10,17 @@
 // worker controls the page, so a non-controlling worker at a sub-scope still
 // receives push events perfectly well.
 
-self.addEventListener('install', () => {
+self.addEventListener("install", () => {
   // Don't sit in `waiting` behind a previous version — a vendor should never
   // miss an order because an old worker is still parked.
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('push', (event) => {
+self.addEventListener("push", (event) => {
   // iOS enforces userVisibleOnly strictly: every push MUST result in a shown
   // notification or Safari revokes the subscription after a few violations.
   // So there is no early return in here — every branch ends in
@@ -30,24 +30,24 @@ self.addEventListener('push', (event) => {
     try {
       payload = event.data.json();
     } catch (_) {
-      payload = { title: 'YAPP', body: event.data.text() };
+      payload = { title: "Yaap", body: event.data.text() };
     }
   }
 
-  const title = payload.title || 'New order';
+  const title = payload.title || "New order";
   const options = {
-    body: payload.body || '',
-    icon: payload.icon || 'icons/Icon-192.png',
-    badge: payload.badge || 'icons/Icon-192.png',
+    body: payload.body || "",
+    icon: payload.icon || "icons/Icon-192.png",
+    badge: payload.badge || "icons/Icon-192.png",
     // A tag collapses repeats for the same order into one notification
     // instead of stacking; renotify re-alerts the device even when collapsing.
-    tag: payload.tag || 'yapp-order',
+    tag: payload.tag || "yaap-order",
     renotify: true,
     // Ignored on iOS, honoured on desktop Chrome — keeps the order visible
     // until the vendor actually deals with it.
     requireInteraction: true,
     data: {
-      url: payload.url || '/',
+      url: payload.url || "/",
       orderId: payload.orderId || null,
     },
   };
@@ -55,11 +55,11 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const data = event.notification.data || {};
-  const target = new URL(data.url || '/', self.location.origin).href;
+  const target = new URL(data.url || "/", self.location.origin).href;
 
   event.waitUntil(
     (async () => {
@@ -69,14 +69,14 @@ self.addEventListener('notificationclick', (event) => {
       // does not control the page (see the scope note above), so without it
       // matchAll() returns nothing and every tap would open a new window.
       const clientList = await self.clients.matchAll({
-        type: 'window',
+        type: "window",
         includeUncontrolled: true,
       });
 
       for (const client of clientList) {
-        if ('focus' in client) {
+        if ("focus" in client) {
           await client.focus();
-          if ('navigate' in client) {
+          if ("navigate" in client) {
             try {
               await client.navigate(target);
             } catch (_) {
@@ -99,15 +99,15 @@ self.addEventListener('notificationclick', (event) => {
 // subscription is dead at that point and the row in `push_subscriptions` is
 // stale, so tell any open client to re-subscribe and re-upsert. If nothing is
 // open, PushService.syncExisting() repairs it on next launch.
-self.addEventListener('pushsubscriptionchange', (event) => {
+self.addEventListener("pushsubscriptionchange", (event) => {
   event.waitUntil(
     (async () => {
       const clientList = await self.clients.matchAll({
-        type: 'window',
+        type: "window",
         includeUncontrolled: true,
       });
       for (const client of clientList) {
-        client.postMessage({ type: 'yapp-push-resubscribe' });
+        client.postMessage({ type: "yaap-push-resubscribe" });
       }
     })(),
   );
